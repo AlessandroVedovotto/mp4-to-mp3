@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MP4 → MP3</title>
+</head>
+<body>
+  <h2>MP4 → MP3 Converter</h2>
+
+  <input type="file" id="file" accept="video/mp4">
+  <br><br>
+
+  <button onclick="upload()">Converti</button>
+  <p id="status"></p>
+
+<script>
+function upload() {
+  const file = document.getElementById("file").files[0];
+  if (!file) return;
+
+  const form = new FormData();
+  form.append("file", file);
+
+  document.getElementById("status").innerText = "Upload in corso...";
+
+  fetch("/convert", {
+    method: "POST",
+    body: form
+  })
+  .then(r => r.blob())
+  .then(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "audio.mp3";
+    a.click();
+    document.getElementById("status").innerText = "Completato 🎧";
+  })
+  .catch(() => {
+    document.getElementById("status").innerText = "Errore";
+  });
+}
+</script>
+</body>
+</html>
