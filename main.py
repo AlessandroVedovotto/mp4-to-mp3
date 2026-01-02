@@ -23,7 +23,7 @@ async def convert(file: UploadFile = File(...)):
 
     # conversione MP4 → MP3
     subprocess.run([
-        "ffmpeg", "-y",
+        "/usr/bin/ffmpeg", "-y",
         "-i", input_path,
         "-vn",
         "-ab", "128k",
