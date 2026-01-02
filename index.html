@@ -1,45 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MP4 → MP3</title>
+<meta charset="UTF-8">
+<title>MP4 → MP3 Converter</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f4f4f9; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin:0;}
+h1 { color: #4a90e2; }
+form { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; width: 350px; }
+input[type=file] { margin-bottom: 15px; }
+button { padding: 10px; border:none; background:#4a90e2; color:white; border-radius:8px; cursor:pointer; font-weight:bold; transition:0.2s; }
+button:hover { background:#357ABD; }
+#loading { display:none; margin-top:10px; }
+</style>
 </head>
 <body>
-  <h2>MP4 → MP3 Converter</h2>
-
-  <input type="file" id="file" accept="video/mp4">
-  <br><br>
-
-  <button onclick="upload()">Converti</button>
-  <p id="status"></p>
-
+<h1>MP4 → MP3 Converter</h1>
+<form id="uploadForm" enctype="multipart/form-data">
+<input type="file" name="file" accept=".mp4" required>
+<button type="submit">Converti in MP3</button>
+<div id="loading">Sto convertendo… attendi</div>
+</form>
 <script>
-function upload() {
-  const file = document.getElementById("file").files[0];
-  if (!file) return;
+const form = document.getElementById("uploadForm");
+const loading = document.getElementById("loading");
 
-  const form = new FormData();
-  form.append("file", file);
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fileInput = form.querySelector("input[type=file]");
+    if(fileInput.files.length === 0) return alert("Seleziona un file MP4");
+    
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    
+    loading.style.display = "block";
+    
+    try {
+        const res = await fetch("/convert", {
+            method: "POST",
+            body: formData
+        });
+        if(!res.ok) throw new Error("Conversione fallita");
 
-  document.getElementById("status").innerText = "Upload in corso...";
-
-  fetch("/convert", {
-    method: "POST",
-    body: form
-  })
-  .then(r => r.blob())
-  .then(blob => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "audio.mp3";
-    a.click();
-    document.getElementById("status").innerText = "Completato 🎧";
-  })
-  .catch(() => {
-    document.getElementById("status").innerText = "Errore";
-  });
-}
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileInput.files[0].name.replace(/\\.mp4$/i, ".mp3");
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    } catch(err) {
+        alert(err.message);
+    } finally {
+        loading.style.display = "none";
+    }
+});
 </script>
 </body>
 </html>
