@@ -45,7 +45,7 @@ form.addEventListener("submit", async (e) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = fileInput.files[0].name.replace(/\\.mp4$/i, ".mp3");
+        a.download = fileInput.files[0].name.replace(/\.mp4$/i, ".mp3");
         document.body.appendChild(a);
         a.click();
         a.remove();

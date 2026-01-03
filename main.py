@@ -37,5 +37,4 @@ async def convert(file: UploadFile = File(...)):
     return FileResponse(
         output_path,
         media_type="audio/mpeg",
-        filename="audio.mp3"
     )
